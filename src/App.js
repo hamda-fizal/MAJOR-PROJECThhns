@@ -6,13 +6,20 @@ import {
   addParticipant,
   setUser,
   removeParticipant,
+  setUserStream,
 } from "./store/actioncreator";
 import { connect } from "react-redux";
 
 function App(props) {
   const participantRef = firepadRef.child("participants");
 
-  useEffect(async () => {
+  useEffect(() => {
+    navigator.mediaDevices
+    .getUserMedia({ audio: true, video: false })
+    .then((mediaStream) => {
+      mediaStream.getVideoTracks()[0].enabled=false;
+      props.setUserStream(mediaStream);
+    });
     const connectedRef = db.database().ref(".info/connected");
 
     connectedRef.on("value", (snap) => {
@@ -52,7 +59,7 @@ function App(props) {
       <MainScreen />
     </div>
   );
-}
+  }
 
 const mapStateToProps = (state) => {
   return {
@@ -64,6 +71,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setUser: (user) => dispatch(setUser(user)),
+    setUserStream: (stream) => dispatch(setUserStream(stream)),
     addParticipant: (user) => dispatch(addParticipant(user)),
     removeParticipant: (userId) => dispatch(removeParticipant(userId)),
   };

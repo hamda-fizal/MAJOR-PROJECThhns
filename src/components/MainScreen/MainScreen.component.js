@@ -3,7 +3,7 @@ import MeetingFooter from "../MeetingFooter/MeetingFooter.component";
 import Participants from "../Participants/Participants.component";
 import "./MainScreen.css";
 import { connect } from "react-redux";
-import { updateUser } from "../../store/actioncreator";
+
 const MainScreen = () => {
   return (
     <div className="wrapper">
@@ -23,10 +23,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    updateUser: (user) => dispatch(updateUser(user)),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
+export default connect(mapStateToProps)(MainScreen);
