@@ -15,11 +15,10 @@ function App(props) {
 
   useEffect(() => {
     navigator.mediaDevices
-    .getUserMedia({ audio: true, video: false })
-    .then((mediaStream) => {
-      mediaStream.getVideoTracks()[0].enabled=false;
-      props.setUserStream(mediaStream);
-    });
+      .getUserMedia({ audio: true, video: false })
+      .then((mediaStream) => {
+        props.setUserStream(mediaStream);
+      });
     const connectedRef = db.database().ref(".info/connected");
 
     connectedRef.on("value", (snap) => {
@@ -59,7 +58,7 @@ function App(props) {
       <MainScreen />
     </div>
   );
-  }
+}
 
 const mapStateToProps = (state) => {
   return {
