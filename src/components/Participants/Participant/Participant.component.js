@@ -31,7 +31,7 @@ export const Participant = ({ participant }) => {
   return (
     <div className={`participant `}>
       <Card className="card">
-        <audio ref={audioRef} autoPlay playsInline>
+        <audio ref={audioRef} autoPlay>
           {" "}
         </audio>
         <div style={{ background: participant.avatarColor }} className="avatar">
