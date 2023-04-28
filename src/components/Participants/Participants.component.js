@@ -3,19 +3,6 @@ import "./Participants.css";
 import { connect, useSelector } from "react-redux";
 import { Participant } from "./Participant/Participant.component";
 
-//export const Participant=({participant})=>{
-  //const videoRef=useRef(null);
-  //const userStream= useSelector((state)=> state.mainStream);
-  //const remoteStream=new MediaStream();
-  //useEffect(() =>{
-    //if(participant.peerConnection){
-      //participant.peerConnection.ontrack=(event)=>{
-
-      //}
-    //}
-  //}
-//}
-
 const Participants = (props) => {
   let participantKey = Object.keys(props.participants);
 
@@ -40,6 +27,7 @@ const Participants = (props) => {
     >
       {Object.keys(participants).map((participantKey) => {
         const currentParticipant = participants[participantKey];
+
         return (
           <Participant participant={currentParticipant} key={participantKey} />
         );

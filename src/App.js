@@ -7,19 +7,23 @@ import {
   setUser,
   removeParticipant,
   setUserStream,
+  updateParticipant,
 } from "./store/actioncreator";
 import { connect } from "react-redux";
 
 function App(props) {
   const participantRef = firepadRef.child("participants");
 
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true, video: false })
-      .then((mediaStream) => {
-        props.setUserStream(mediaStream);
-      });
-    const connectedRef = db.database().ref(".info/connected");
+  const getUserStream = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+
+    return stream;
+  };
+  useEffect(async () => {
+    const mediaStream = await getUserStream();
+    props.setUserStream(mediaStream);
 
     connectedRef.on("value", (snap) => {
       if (snap.val()) {
@@ -38,21 +42,38 @@ function App(props) {
     });
   }, []);
 
+  const connectedRef = db.database().ref(".info/connected");
+
+  const isUserSet = !!props.user;
+  const isStreamSet = !!props.stream;
+
   useEffect(() => {
-    participantRef.on("child_added", (snap) => {
-      const { userName: name, preferences = {} } = snap.val();
-      props.addParticipant({
-        [snap.key]: {
-          name,
-          ...preferences,
-        },
+    if (isStreamSet && isUserSet) {
+      participantRef.on("child_added", (snap) => {
+        const preferenceUpdateEvent = participantRef
+          .child(snap.key)
+          .child("preferences");
+        preferenceUpdateEvent.on("child_changed", (preferenceSnap) => {
+          props.updateParticipant({
+            [snap.key]: {
+              [preferenceSnap.key]: preferenceSnap.val(),
+            },
+          });
+        });
+        const { userName: name, preferences = {} } = snap.val();
+        props.addParticipant({
+          [snap.key]: {
+            name,
+            ...preferences,
+          },
+        });
       });
-    });
-    participantRef.on("child_removed", (snap) => {
-      props.removeParticipant(snap.key);
-    });
-    // }
-  }, [props.user]);
+      participantRef.on("child_removed", (snap) => {
+        props.removeParticipant(snap.key);
+      });
+    }
+  }, [isStreamSet, isUserSet]);
+
   return (
     <div className="App">
       <MainScreen />
@@ -62,8 +83,8 @@ function App(props) {
 
 const mapStateToProps = (state) => {
   return {
+    stream: state.userStream,
     user: state.currentUser,
-    participants: state.participants,
   };
 };
 
@@ -73,6 +94,7 @@ const mapDispatchToProps = (dispatch) => {
     setUserStream: (stream) => dispatch(setUserStream(stream)),
     addParticipant: (user) => dispatch(addParticipant(user)),
     removeParticipant: (userId) => dispatch(removeParticipant(userId)),
+    updateParticipant: (user) => dispatch(updateParticipant(user)),
   };
 };
 
