@@ -8,6 +8,10 @@ import { createStore } from "redux";
 import { reducer } from "./store/reducer";
 
 export const store = createStore(reducer);
+
+// const buttonEl = document.getElementById('button');
+// buttonEl.addEventListener('click', () => run());
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>

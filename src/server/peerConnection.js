@@ -1,11 +1,20 @@
 import dbRef from "./firebase";
 import { store } from "..";
+
 const participantRef = dbRef.child("participants");
+
+export const updatePreference = (userId, preference) => {
+  const currentParticipantRef = participantRef
+    .child(userId)
+    .child("preferences");
+  setTimeout(() => {
+    currentParticipantRef.update(preference);
+  });
+};
 
 export const createOffer = async (peerConnection, createdId, recieverId) => {
   const receiverRef = participantRef.child(recieverId);
   const offer = await peerConnection.createOffer();
-
   peerConnection.onicecandidate = (event) => {
     event.candidate &&
       receiverRef
