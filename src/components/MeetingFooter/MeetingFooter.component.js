@@ -17,7 +17,13 @@ const MeetingFooter = (props) => {
       };
     });
   };
-
+  const endCallClick = () => {
+    try {
+      let tracks = this.setStreamState.current.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
+    } catch (e) {}
+    window.location.href = "/";
+  };
   useEffect(() => {
     props.onMicClick(streamState.mic);
   }, [streamState.mic]);
@@ -34,7 +40,11 @@ const MeetingFooter = (props) => {
           title="Mute"
         />
       </div>
-      <div className={"meeting-icons active"} data-tip={"EndCall"}>
+      <div
+        className={"meeting-icons active"}
+        data-tip={"EndCall"}
+        onClick={endCallClick}
+      >
         <FontAwesomeIcon icon={faPhone} />
       </div>
       <ReactTooltip />
