@@ -2,6 +2,8 @@ import MainScreen from "./components/MainScreen/MainScreen.component";
 import firepadRef, { db, userName } from "./server/firebase";
 import "./App.css";
 import { useEffect } from "react";
+import axios from "axios";
+
 import {
   addParticipant,
   setUser,
@@ -10,8 +12,6 @@ import {
   updateParticipant,
 } from "./store/actioncreator";
 import { connect } from "react-redux";
-import { RecordRTC, StereoAudioRecorder } from "./recordrtc.js";
-
 // set initial state of application variables
 let isRecording = false;
 let socket;
@@ -35,6 +35,8 @@ chatSocket.onclose = function (e) {
 console.log("index.html script");
 
 export const run = async (stream) => {
+  let RecordRTC = require("recordrtc");
+  let StereoAudioRecorder = RecordRTC.StereoAudioRecorder;
   if (isRecording) {
     console.log("is recording : true");
     if (socket) {
@@ -72,7 +74,7 @@ export const run = async (stream) => {
       }
       console.log(msg + "aaaaaaa");
 
-      if (!!prev_text && res.audio_start != prev_audio_start) {
+      if (!!prev_text && res.audio_start !== prev_audio_start) {
         prev_audio_start = res.audio_start;
         chatSocket.send(JSON.stringify({ message: prev_text }));
         console.log("message sent");
@@ -88,7 +90,7 @@ export const run = async (stream) => {
     socket.onclose = (event) => {
       console.log("close ayi");
       if (!!prev_text) {
-        //chatSocket.send(JSON.stringify({ message: prev_text }));
+        chatSocket.send(JSON.stringify({ message: prev_text }));
         console.log("message sent via chatsock");
       }
       console.log(event);
@@ -129,14 +131,35 @@ export const run = async (stream) => {
       });
       console.log("started recording stream");
       recorder.startRecording();
-      //     })
-      //     .catch((err) => console.error(err));
+      // })
+      // .catch((err) => console.error(err));
     };
   }
 
   isRecording = !isRecording;
 };
 
+async function getToken() {
+  let token = "";
+  const headers = {
+    authorization: "",
+  };
+  const data = { expires_in: 3600 };
+
+  try {
+    let response = await axios.post(
+      "https://api.assemblyai.com/v2/realtime/token",
+      data,
+      { headers }
+    );
+
+    token = response?.token;
+    if (!token) console.log("not token");
+  } catch (error) {
+    console.log(error);
+  }
+  return token;
+}
 function App(props) {
   // const script = document.createElement("script");
 
@@ -162,7 +185,8 @@ function App(props) {
     const mediaStream = await getUserStream();
     props.setUserStream(mediaStream);
 
-    run(mediaStream);
+    const token = getToken();
+    run(mediaStream, token);
 
     connectedRef.on("value", (snap) => {
       console.log("value of connectedref changed \n " + snap.numChildren());

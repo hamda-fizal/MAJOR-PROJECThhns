@@ -2,8 +2,6 @@ import React, { useEffect, useRef } from "react";
 import Card from "../../Shared/Card/Card.component";
 import "./Participant.css";
 import { useSelector } from "react-redux";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMicrophoneSlash } from "@fortawesome/free-solid-svg-icons";
 
 export const Participant = ({ participant }) => {
   const audioRef = useRef(null);
