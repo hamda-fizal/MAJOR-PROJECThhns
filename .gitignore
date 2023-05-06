@@ -5,6 +5,11 @@
 /.pnp
 .pnp.js
 
+#virtual env
+/venv/*
+#pycache
+/mysite/chat/__pycache__
+/mysite/mysite/__pycache__
 # testing
 /coverage
 
