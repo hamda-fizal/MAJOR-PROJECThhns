@@ -16,13 +16,14 @@ import { connect } from "react-redux";
 let isRecording = false;
 let socket;
 let recorder;
-const token = "";
 // runs real-time transcription and handles global variables
 const roomName = "test";
 const chatSocket = new WebSocket(
-  "ws://" + window.location.host + "/ws/chat/" + roomName + "/"
+  "ws://127.0.0.1:8000/ws/chat/" + roomName + "/"
 );
-
+chatSocket.onopen = function (e) {
+  console.log("chatsocket opened and ready to use");
+};
 chatSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
   console.log("chatSock.onmessage: ", data);
@@ -32,14 +33,7 @@ chatSocket.onclose = function (e) {
   console.error("Chat socket closed unexpectedly");
 };
 
-console.log("index.html script");
-
 function App(props) {
-  // const script = document.createElement("script");
-
-  // script.src = "https://www.WebRTC-Experiment.com/RecordRTC.js";
-  // document.body.appendChild(script);
-
   const connectedRef = db.database().ref(".info/connected");
   console.log("db connected");
 
