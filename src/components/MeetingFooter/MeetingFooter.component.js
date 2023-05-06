@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMicrophone,
@@ -8,18 +8,43 @@ import {
 import ReactTooltip from "react-tooltip";
 import "./MeetingFooter.css";
 const MeetingFooter = (props) => {
-  const micClick = () => {};
+  const [streamState, setStreamState] = useState({ mic: true });
+  const micClick = () => {
+    setStreamState((currentState) => {
+      return {
+        ...currentState,
+        mic: !currentState.mic,
+      };
+    });
+  };
+  const endCallClick = () => {
+    try {
+      let tracks = this.setStreamState.current.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
+    } catch (e) {}
+    window.location.href = "/";
+  };
+  useEffect(() => {
+    props.onMicClick(streamState.mic);
+  }, [streamState.mic]);
 
   return (
     <div className="meeting-footer">
       <div
-        className={"meeting-icons "}
-        data-tip={"Mute Audio"}
+        className={"meeting-icons " + (!streamState.mic ? "active" : "")}
+        data-tip={streamState.mic ? "Mute Audio" : "Unmute Audio"}
         onClick={micClick}
       >
-        <FontAwesomeIcon icon={faMicrophone} title="Mute" />
+        <FontAwesomeIcon
+          icon={!streamState.mic ? faMicrophoneSlash : faMicrophone}
+          title="Mute"
+        />
       </div>
-      <div className={"meeting-icons active"} data-tip={"EndCall"}>
+      <div
+        className={"meeting-icons active"}
+        data-tip={"EndCall"}
+        onClick={endCallClick}
+      >
         <FontAwesomeIcon icon={faPhone} />
       </div>
       <ReactTooltip />

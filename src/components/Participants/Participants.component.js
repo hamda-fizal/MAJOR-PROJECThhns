@@ -27,6 +27,7 @@ const Participants = (props) => {
     >
       {Object.keys(participants).map((participantKey) => {
         const currentParticipant = participants[participantKey];
+
         return (
           <Participant participant={currentParticipant} key={participantKey} />
         );
