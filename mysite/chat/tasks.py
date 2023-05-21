@@ -23,7 +23,7 @@ def detect(text, user_id, channel):
             output = model(input_ids)
             logits = output[0]
             _, preds = torch.max(logits, 1)
-            result = {"success": True, "toxic": bool(preds.numpy()[0])}
+            result = {"success": True, "toxic": bool(preds.numpy()[0]), "user_id": user_id}
     except Exception as e:
         print(e)
         result = {"success": False}
