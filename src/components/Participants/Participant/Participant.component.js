@@ -34,7 +34,7 @@ export const Participant = ({ participant, isToxic }) => {
   return (
     <div className={`participant `}>
       <Card className="card">
-        {isToxic && (
+        {isToxic && participant.currentUser && (
           <div className="top-right">
             <FontAwesomeIcon icon={faBan} />
             Muted due to toxic speech
