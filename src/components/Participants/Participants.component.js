@@ -27,9 +27,7 @@ const Participants = (props) => {
     >
       {Object.keys(participants).map((participantKey) => {
         const currentParticipant = participants[participantKey];
-        console.log(
-          "Participants from useselector :\n" + JSON.stringify(participants)
-        );
+        if (!participants[participantKey]?.name) return <></>
         return (
           <Participant participant={currentParticipant} key={participantKey} />
         );

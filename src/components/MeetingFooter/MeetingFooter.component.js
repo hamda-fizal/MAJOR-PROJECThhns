@@ -7,9 +7,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import ReactTooltip from "react-tooltip";
 import "./MeetingFooter.css";
-const MeetingFooter = (props) => {
+const MeetingFooter = ({isToxic = false, ...props}) => {
   const [streamState, setStreamState] = useState({ mic: true });
   const micClick = () => {
+    if (props?.isToxic) return;
     setStreamState((currentState) => {
       return {
         ...currentState,
@@ -33,14 +34,18 @@ const MeetingFooter = (props) => {
   return (
     <div className="meeting-footer">
       <div
-        className={"meeting-icons " + (!streamState.mic ? "active" : "")}
+        className={"meeting-icons " + (!streamState.mic || isToxic ? "active" : "")}
         data-tip={streamState.mic ? "Mute Audio" : "Unmute Audio"}
-        onClick={micClick}
+        onClick={!isToxic ? micClick : () => {}}
       >
+        {isToxic ? <FontAwesomeIcon
+          icon={faMicrophoneSlash}
+          title="Muted due to toxicity"
+        /> : 
         <FontAwesomeIcon
           icon={!streamState.mic ? faMicrophoneSlash : faMicrophone}
           title="Mute"
-        />
+        />}
       </div>
       <div
         className={"meeting-icons active"}

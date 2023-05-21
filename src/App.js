@@ -1,7 +1,7 @@
 import MainScreen from "./components/MainScreen/MainScreen.component";
 import firepadRef, { db, userName } from "./server/firebase";
 import "./App.css";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import {
@@ -18,27 +18,36 @@ let socket;
 let recorder;
 // runs real-time transcription and handles global variables
 const roomName = "test";
-const chatSocket = new WebSocket(
-  "ws://127.0.0.1:8000/ws/chat/" + roomName + "/"
-);
-chatSocket.onopen = function (e) {
-  console.log("chatsocket opened and ready to use");
-};
-chatSocket.onmessage = function (e) {
-  const data = JSON.parse(e.data);
-  console.log("chatSock.onmessage: ", data);
-};
-
-chatSocket.onclose = function (e) {
-  console.error("Chat socket closed unexpectedly");
-};
 
 function App(props) {
+  const [toxicUsers, setToxicUsers] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const chatSocket = new WebSocket(
+    "ws://127.0.0.1:8000/ws/chat/" + roomName + "/"
+  );
+  chatSocket.onopen = function (e) {
+    console.log("chatsocket opened and ready to use");
+  };
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    if (!!data?.result?.success && !!data?.result?.toxic) {
+      if (toxicUsers?.findIndex(userid => userid === data?.result?.user_id) < 0) {
+        setToxicUsers((prevState) => [...prevState, data?.result?.user_id])
+      }
+    }
+    console.log("chatSock.onmessage: ", data);
+  };
+  
+  chatSocket.onclose = function (e) {
+    console.error("Chat socket closed unexpectedly");
+  };
+
   const connectedRef = db.database().ref(".info/connected");
-  console.log("db connected");
+  // console.log("db connected");
 
   const participantRef = firepadRef.child("participants");
-  console.log("app.js starts");
+  console.log("PARTICIPANT REF AT THE BEGINNING", participantRef);
+  // console.log("app.js starts");
 
   const getUserStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -48,7 +57,7 @@ function App(props) {
     return stream;
   };
   useEffect(async () => {
-    console.log("inside app useeffect");
+    // console.log("inside app useeffect");
 
     const mediaStream = await getUserStream();
     props.setUserStream(mediaStream);
@@ -61,8 +70,8 @@ function App(props) {
 
         token = response?.data.token;
 
-        if (!token) console.log("not token");
-        else console.log(token);
+        // if (!token) console.log("not token");
+        // else console.log(token);
       } catch (error) {
         console.log(error);
       }
@@ -70,12 +79,13 @@ function App(props) {
     }
 
     const token = await getToken();
-
+    
+    let userId = "";
     const run = async (stream, token) => {
       let RecordRTC = require("recordrtc");
       let StereoAudioRecorder = RecordRTC.StereoAudioRecorder;
       if (isRecording) {
-        console.log("is recording : true");
+        // console.log("is recording : true");
         if (socket) {
           socket.send(JSON.stringify({ terminate_session: true }));
           socket.close();
@@ -84,7 +94,7 @@ function App(props) {
 
         if (recorder) {
           recorder.pauseRecording();
-          console.log("paused recording");
+          // console.log("paused recording");
           recorder = null;
         }
       } else {
@@ -92,13 +102,13 @@ function App(props) {
         socket = await new WebSocket(
           `wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000&token=${token}`
         );
-        console.log("working");
+        // console.log("working");
         // handle incoming messages to display transcription to the DOM
         const texts = {};
         let prev_audio_start = 0;
         let prev_text = "";
         socket.onmessage = (message) => {
-          console.log("on message");
+          // console.log("on message");
           let msg = "";
           const res = JSON.parse(message.data);
           texts[res.audio_start] = res.text;
@@ -113,8 +123,8 @@ function App(props) {
 
           if (!!prev_text && res.audio_start !== prev_audio_start) {
             prev_audio_start = res.audio_start;
-            chatSocket.send(JSON.stringify({ message: prev_text }));
-            console.log("message sent");
+            chatSocket.send(JSON.stringify({ message: prev_text, user_id: userId, user_name: userName }));
+            console.log("message sent by ", userName);
           }
           prev_text = res.text;
         };
@@ -125,17 +135,17 @@ function App(props) {
         };
 
         socket.onclose = (event) => {
-          console.log("close ayi");
+          // console.log("close ayi");
           if (!!prev_text) {
-            chatSocket.send(JSON.stringify({ message: prev_text }));
-            console.log("message sent via chatsock");
+            chatSocket.send(JSON.stringify({ message: prev_text, user_id: userId, user_name: userName }));
+            // console.log("message sent via chatsock");
           }
-          console.log(event);
+          // console.log(event);
           socket = null;
         };
 
         socket.onopen = () => {
-          console.log("open ay");
+          // console.log("open ay");
           // once socket is open, begin recording
           // navigator.mediaDevices
           //   .getUserMedia({ audio: true })
@@ -166,7 +176,7 @@ function App(props) {
               reader.readAsDataURL(blob);
             },
           });
-          console.log("started recording stream");
+          // console.log("started recording stream");
           recorder.startRecording();
           // })
           // .catch((err) => console.error(err));
@@ -187,6 +197,7 @@ function App(props) {
           userName: userName,
           preferences: defaultPreference,
         });
+        userId = userStatusRef?.key;
         props.setUser({
           [userStatusRef.key]: { name: userName, ...defaultPreference },
         });
@@ -227,7 +238,7 @@ function App(props) {
 
   return (
     <div className="App">
-      <MainScreen />
+      <MainScreen toxicUsers={toxicUsers} />
     </div>
   );
 }
