@@ -7,13 +7,13 @@ import { setUserStream, updateUser } from "../../store/actioncreator";
 import { useSelector } from "react-redux";
 
 const MainScreen = (props) => {
-  const {toxicUsers} = props;
+  const { toxicUsers } = props;
   const [isToxic, setIsToxic] = useState(false);
-  const userState = useSelector(state => state?.currentUser);
+  const userState = useSelector((state) => state?.currentUser);
   const participantRef = useRef(props.participants);
   const onMicClick = (micEnabled) => {
     if (micEnabled && isToxic) {
-      return
+      return;
     }
     if (props.stream) {
       props.stream.getAudioTracks()[0].enabled = micEnabled;
@@ -26,14 +26,18 @@ const MainScreen = (props) => {
   }, [props.participants]);
 
   useEffect(() => {
-    const toxic = toxicUsers.findIndex((userId) => userId === Object.keys(userState)[0]) >= 0;
+    const toxic =
+      toxicUsers.findIndex((userId) => userId === Object.keys(userState)[0]) >=
+      0;
     setIsToxic(toxic);
-    onMicClick(false);
-  }, [toxicUsers])
+    if (toxic) {
+      onMicClick(false);
+    }
+  }, [toxicUsers]);
 
   return (
     <div className="wrapper">
-      <div className="main-screen">{<Participants />}</div>
+      <div className="main-screen">{<Participants isToxic={isToxic} />}</div>
 
       <div className="footer">
         <MeetingFooter isToxic={isToxic} onMicClick={onMicClick} />

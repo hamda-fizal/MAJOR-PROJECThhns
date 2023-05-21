@@ -4,6 +4,7 @@ import { connect, useSelector } from "react-redux";
 import { Participant } from "./Participant/Participant.component";
 
 const Participants = (props) => {
+  const { isToxic } = props;
   let participantKey = Object.keys(props.participants);
 
   let gridCol =
@@ -27,9 +28,13 @@ const Participants = (props) => {
     >
       {Object.keys(participants).map((participantKey) => {
         const currentParticipant = participants[participantKey];
-        if (!participants[participantKey]?.name) return <></>
+        if (!participants[participantKey]?.name) return <></>;
         return (
-          <Participant participant={currentParticipant} key={participantKey} />
+          <Participant
+            participant={currentParticipant}
+            key={participantKey}
+            isToxic={isToxic}
+          />
         );
       })}
     </div>

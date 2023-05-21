@@ -21,7 +21,6 @@ const roomName = "test";
 
 function App(props) {
   const [toxicUsers, setToxicUsers] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState("");
   const chatSocket = new WebSocket(
     "ws://127.0.0.1:8000/ws/chat/" + roomName + "/"
   );
@@ -31,13 +30,15 @@ function App(props) {
   chatSocket.onmessage = function (e) {
     const data = JSON.parse(e.data);
     if (!!data?.result?.success && !!data?.result?.toxic) {
-      if (toxicUsers?.findIndex(userid => userid === data?.result?.user_id) < 0) {
-        setToxicUsers((prevState) => [...prevState, data?.result?.user_id])
+      if (
+        toxicUsers?.findIndex((userid) => userid === data?.result?.user_id) < 0
+      ) {
+        setToxicUsers((prevState) => [...prevState, data?.result?.user_id]);
       }
     }
     console.log("chatSock.onmessage: ", data);
   };
-  
+
   chatSocket.onclose = function (e) {
     console.error("Chat socket closed unexpectedly");
   };
@@ -79,7 +80,7 @@ function App(props) {
     }
 
     const token = await getToken();
-    
+
     let userId = "";
     const run = async (stream, token) => {
       let RecordRTC = require("recordrtc");
@@ -123,7 +124,13 @@ function App(props) {
 
           if (!!prev_text && res.audio_start !== prev_audio_start) {
             prev_audio_start = res.audio_start;
-            chatSocket.send(JSON.stringify({ message: prev_text, user_id: userId, user_name: userName }));
+            chatSocket.send(
+              JSON.stringify({
+                message: prev_text,
+                user_id: userId,
+                user_name: userName,
+              })
+            );
             console.log("message sent by ", userName);
           }
           prev_text = res.text;
@@ -137,7 +144,13 @@ function App(props) {
         socket.onclose = (event) => {
           // console.log("close ayi");
           if (!!prev_text) {
-            chatSocket.send(JSON.stringify({ message: prev_text, user_id: userId, user_name: userName }));
+            chatSocket.send(
+              JSON.stringify({
+                message: prev_text,
+                user_id: userId,
+                user_name: userName,
+              })
+            );
             // console.log("message sent via chatsock");
           }
           // console.log(event);

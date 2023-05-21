@@ -2,8 +2,10 @@ import React, { useEffect, useRef } from "react";
 import Card from "../../Shared/Card/Card.component";
 import "./Participant.css";
 import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBan } from "@fortawesome/free-solid-svg-icons";
 
-export const Participant = ({ participant }) => {
+export const Participant = ({ participant, isToxic }) => {
   const audioRef = useRef(null);
   const remoteStream = new MediaStream();
   const userStream = useSelector((state) => state.userStream);
@@ -32,6 +34,12 @@ export const Participant = ({ participant }) => {
   return (
     <div className={`participant `}>
       <Card className="card">
+        {isToxic && (
+          <div className="top-right">
+            <FontAwesomeIcon icon={faBan} />
+            Muted due to toxic speech
+          </div>
+        )}
         <audio ref={audioRef} autoPlay>
           {" "}
         </audio>
