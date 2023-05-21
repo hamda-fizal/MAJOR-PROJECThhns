@@ -31,7 +31,8 @@ class ChatConsumer(WebsocketConsumer):
         if (text_data_json):
             print(text_data)
             message = text_data_json["message"]
-            detect.send(message, self.room_group_name)
+            user_id = text_data_json["user_id"]
+            detect.send(message, user_id, self.room_group_name)
 
             # Send message to room group
             # async_to_sync(self.channel_layer.group_send)(
