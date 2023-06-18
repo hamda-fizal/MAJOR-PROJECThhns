@@ -134,13 +134,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Daphne
 ASGI_APPLICATION = "mysite.asgi.application"
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
 
 # Channelsc
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
@@ -155,7 +157,7 @@ CORS_ORIGIN_WHITELIST = (
 DRAMATIQ_BROKER = {
     "BROKER": "dramatiq.brokers.redis.RedisBroker",
     "OPTIONS": {
-        "url": "redis://127.0.0.1:6379",
+        "url": f"redis://{REDIS_HOST}:{REDIS_PORT}",
     },
     "MIDDLEWARE": [
         "dramatiq.middleware.Prometheus",
@@ -175,7 +177,7 @@ DRAMATIQ_TASKS_DATABASE = "default"
 DRAMATIQ_RESULT_BACKEND = {
     "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
     "BACKEND_OPTIONS": {
-        "url": "redis://localhost:6379",
+        "url": f"redis://{REDIS_HOST}:{REDIS_PORT}",
     },
     "MIDDLEWARE_OPTIONS": {
         "result_ttl": 1000 * 60 * 10

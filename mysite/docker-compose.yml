@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    entrypoint: "./entrypoint.sh"
+  redis:
+    image: "redis:alpine"
+  dramatiq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    command: python manage.py rundramatiq
+    links:
+      - redis:redis
+      - web:web
+    depends_on:
+      - web
+      - redis
+    volumes:
+      - .:/code/
+  # react:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-react
+  #   command: npm start
+  #   ports:
+  #     - "3000:3000"
+  #   # links:
+  #   #   - redis:redis
+  #   #   - web:web
+  #   # depends_on:
+  #   #   - web
+  #   volumes:
+  #     - ./package.json:/code/package.json
+  #     - ./package-lock.json:/code/package-lock.json
+  #     - /code/node_modules
